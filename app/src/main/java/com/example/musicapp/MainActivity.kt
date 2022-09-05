@@ -16,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.commit
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +27,10 @@ import java.util.jar.Manifest
 class MainActivity : AppCompatActivity() {
     lateinit var files: Array<File>
     lateinit var adapter: MusicListAdapter
-    lateinit var chooseDirButton: Button
-    lateinit var musicList: RecyclerView
+//    lateinit var chooseDirButton: Button
+//    lateinit var musicList: RecyclerView
     lateinit var mediaPlayer: CustomMediaPlayer
-    lateinit var chooseOtherDirButton: Button
+//    lateinit var chooseOtherDirButton: Button
     lateinit var musicPlayerContainer: LinearLayoutCompat
 
     private val POPUP_MENU_FIRST = 100
@@ -37,9 +38,19 @@ class MainActivity : AppCompatActivity() {
     private val DIR_SEPARATOR = "<>"
 
     private val folder = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
-        val file = uri!!.path?.let { File(it) }
-        val pathWithoutExt = file!!.path.split("primary:")[1]
-        createMusicList(pathWithoutExt)
+        if (uri == null) {
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle("Error!")
+                .setMessage("Please choose a directory!")
+                .setNeutralButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        } else {
+            val file = uri.path?.let { File(it) }
+            val pathWithoutExt = file!!.path.split("primary:")[1]
+            createMusicList(pathWithoutExt)
+        }
     }
 
     private val requestPermissionLauncher: ActivityResultLauncher<String> = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -55,11 +66,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        musicList = findViewById(R.id.song_list)
-        chooseDirButton = findViewById(R.id.dir_select)
+//        musicList = findViewById(R.id.song_list)
+        if (savedInstanceState == null) {
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                add(R.id.fragment_container, ButtonFragment.newInstance("", ""))
+            }
+        }
+//        chooseDirButton = findViewById(R.id.dir_select)
         musicPlayerContainer = findViewById(R.id.music_player_container)
 
-        registerForContextMenu(musicList)
+//        registerForContextMenu(musicList)
 
         mediaPlayer = CustomMediaPlayer(
             "",
@@ -72,12 +89,12 @@ class MainActivity : AppCompatActivity() {
 
         mediaPlayer.musicTitleTextView.isSelected = true
 
-        chooseDirButton.setOnClickListener(View.OnClickListener {
-            requestPermission()
-        })
+//        chooseDirButton.setOnClickListener(View.OnClickListener {
+//            requestPermission()
+//        })
     }
 
-    private fun requestPermission() {
+    fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             when {
                 ContextCompat.checkSelfPermission(
@@ -160,16 +177,16 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer.mediaPlayer.reset()
             }
 
-            adapter = MusicListAdapter(files.toMutableList(), mediaPlayer, menuInflater, 0, musicList)
-
-            musicList.adapter = adapter
-            musicList.layoutManager = LinearLayoutManager(applicationContext)
-            val decoration: RecyclerView.ItemDecoration = DividerItemDecoration(baseContext, DividerItemDecoration.HORIZONTAL)
-            musicList.addItemDecoration(decoration)
-
-            chooseDirButton.visibility = View.GONE
-            musicList.visibility = View.VISIBLE
-            musicPlayerContainer.visibility = View.GONE
+//            adapter = MusicListAdapter(files.toMutableList(), mediaPlayer, menuInflater, 0, musicList)
+//
+//            musicList.adapter = adapter
+//            musicList.layoutManager = LinearLayoutManager(applicationContext)
+//            val decoration: RecyclerView.ItemDecoration = DividerItemDecoration(baseContext, DividerItemDecoration.HORIZONTAL)
+//            musicList.addItemDecoration(decoration)
+//
+//            chooseDirButton.visibility = View.GONE
+//            musicList.visibility = View.VISIBLE
+//            musicPlayerContainer.visibility = View.GONE
         }
     }
 
@@ -190,80 +207,80 @@ class MainActivity : AppCompatActivity() {
         return mutableList.toTypedArray()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater: MenuInflater = menuInflater
-        var openDirIcon = 0
-        var closedDirIcon = 0
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        val inflater: MenuInflater = menuInflater
+//        var openDirIcon = 0
+//        var closedDirIcon = 0
+//
+//        when (baseContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK){
+//            Configuration.UI_MODE_NIGHT_YES -> {
+//                inflater.inflate(R.menu.menu_main_dark, menu)
+//                openDirIcon = R.drawable.ic_directory_open_white
+//                closedDirIcon = R.drawable.ic_directory_white
+//            }
+//            Configuration.UI_MODE_NIGHT_NO -> {
+//                inflater.inflate(R.menu.menu_main_light, menu)
+//                openDirIcon = R.drawable.ic_directory_open_black
+//                closedDirIcon = R.drawable.ic_directory_black
+//            }
+//        }
+//
+//        Handler(Looper.myLooper()!!).post(Runnable {
+//            val view = findViewById<View>(R.id.choose_dir)
+//
+//            if (view !== null) {
+//                view.setOnLongClickListener(View.OnLongClickListener {
+//                    menu.getItem(1).setIcon(openDirIcon)
+//
+//                    val popupMenu = PopupMenu(baseContext, it)
+//                    val sp = getSharedPreferences(SP_FILE, MODE_PRIVATE)
+//                    val dirs = sp.getString("dirs", null)
+//
+//                    if (dirs !== null) {
+//                        val dirList = dirs.split(DIR_SEPARATOR)
+//
+//                        for (i in dirList.indices) {
+//                            popupMenu.menu.add(0, POPUP_MENU_FIRST + i, i, dirList[i])
+//                                .setIcon(R.drawable.ic_directory_open_black)
+//                                .setOnMenuItemClickListener {
+//                                    createMusicList(dirList[i])
+//                                    true
+//                                }
+//                                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+//
+//                            popupMenu.setOnDismissListener {
+//                                menu.getItem(1).setIcon(closedDirIcon)
+//                            }
+//                        }
+//
+//                        popupMenu.show()
+//                    } else {
+//                        Toast.makeText(baseContext, "No recent directories!", Toast.LENGTH_LONG).show()
+//                    }
+//
+//                    true
+//                })
+//            }
+//        })
+//
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
-        when (baseContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK){
-            Configuration.UI_MODE_NIGHT_YES -> {
-                inflater.inflate(R.menu.menu_main_dark, menu)
-                openDirIcon = R.drawable.ic_directory_open_white
-                closedDirIcon = R.drawable.ic_directory_white
-            }
-            Configuration.UI_MODE_NIGHT_NO -> {
-                inflater.inflate(R.menu.menu_main_light, menu)
-                openDirIcon = R.drawable.ic_directory_open_black
-                closedDirIcon = R.drawable.ic_directory_black
-            }
-        }
-
-        Handler(Looper.myLooper()!!).post(Runnable {
-            val view = findViewById<View>(R.id.choose_dir)
-
-            if (view !== null) {
-                view.setOnLongClickListener(View.OnLongClickListener {
-                    menu.getItem(1).setIcon(openDirIcon)
-
-                    val popupMenu = PopupMenu(baseContext, it)
-                    val sp = getSharedPreferences(SP_FILE, MODE_PRIVATE)
-                    val dirs = sp.getString("dirs", null)
-
-                    if (dirs !== null) {
-                        val dirList = dirs.split(DIR_SEPARATOR)
-
-                        for (i in dirList.indices) {
-                            popupMenu.menu.add(0, POPUP_MENU_FIRST + i, i, dirList[i])
-                                .setIcon(R.drawable.ic_directory_open_black)
-                                .setOnMenuItemClickListener {
-                                    createMusicList(dirList[i])
-                                    true
-                                }
-                                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-
-                            popupMenu.setOnDismissListener {
-                                menu.getItem(1).setIcon(closedDirIcon)
-                            }
-                        }
-
-                        popupMenu.show()
-                    } else {
-                        Toast.makeText(baseContext, "No recent directories!", Toast.LENGTH_LONG).show()
-                    }
-
-                    true
-                })
-            }
-        })
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.choose_dir -> {
-                requestPermission()
-                true
-            }
-
-            R.id.select -> {
-                startActionMode(adapter.actionModeCallback)
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.choose_dir -> {
+//                requestPermission()
+//                true
+//            }
+//
+//            R.id.select -> {
+//                startActionMode(adapter.actionModeCallback)
+//                true
+//            }
+//
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -277,16 +294,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val position = adapter.position
-        val viewHolder = musicList.findViewHolderForAdapterPosition(position)
+//        val viewHolder = musicList.findViewHolderForAdapterPosition(position)
 
-        when (item.itemId) {
-            R.id.music_control -> adapter.musicControl(position, viewHolder as MusicListAdapter.ViewHolder)
-            R.id.music_stop -> adapter.stopMusic()
-            R.id.seek_forward_5 -> adapter.seek(true, 5, position)
-            R.id.seek_forward_10 -> adapter.seek(true, 10, position)
-            R.id.seek_backward_5 -> adapter.seek(false, 5, position)
-            R.id.seek_backward_10 -> adapter.seek(false, 10, position)
-        }
+//        when (item.itemId) {
+//            R.id.music_control -> adapter.musicControl(position, viewHolder as MusicListAdapter.ViewHolder)
+//            R.id.music_stop -> adapter.stopMusic()
+//            R.id.seek_forward_5 -> adapter.seek(true, 5, position)
+//            R.id.seek_forward_10 -> adapter.seek(true, 10, position)
+//            R.id.seek_backward_5 -> adapter.seek(false, 5, position)
+//            R.id.seek_backward_10 -> adapter.seek(false, 10, position)
+//        }
 
         return super.onContextItemSelected(item)
     }
