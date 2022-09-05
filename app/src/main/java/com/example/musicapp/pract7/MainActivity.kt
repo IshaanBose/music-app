@@ -1,6 +1,5 @@
-package com.example.musicapp
+package com.example.musicapp.pract7
 
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.MediaPlayer
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
-import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity() {
     lateinit var files: Array<File>

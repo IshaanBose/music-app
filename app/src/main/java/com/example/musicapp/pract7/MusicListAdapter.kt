@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.pract7
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
