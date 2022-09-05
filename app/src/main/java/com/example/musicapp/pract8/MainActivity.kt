@@ -1,28 +1,20 @@
-package com.example.musicapp
+package com.example.musicapp.pract8
 
-import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
-import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity() {
     lateinit var files: Array<File>

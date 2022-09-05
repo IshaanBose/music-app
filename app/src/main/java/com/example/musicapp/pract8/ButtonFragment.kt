@@ -1,10 +1,9 @@
-package com.example.musicapp
+package com.example.musicapp.pract8
 
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import android.widget.Toast
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import com.google.android.material.button.MaterialButton
