@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/music_control"
+        android:title="Play/Pause"
+        android:icon="@drawable/ic_play_black"/>
+    <item
+        android:id="@+id/music_stop"
+        android:title="Stop"
+        android:icon="@drawable/ic_stop_black"/>
+    <item
+        android:id="@+id/seek_forward_5"
+        android:title="Seek Forward (5s)"
+        android:icon="@drawable/ic_seek_forward"/>
+    <item
+        android:id="@+id/seek_forward_10"
+        android:title="Seek Forward (10s)"
+        android:icon="@drawable/ic_seek_forward"/>
+    <item
+        android:id="@+id/seek_backward_5"
+        android:title="Seek Backward (5s)"
+        android:icon="@drawable/ic_seek_backward"/>
+    <item
+        android:id="@+id/seek_backward_10"
+        android:title="Seek Backward (10s)"
+        android:icon="@drawable/ic_seek_backward"/>
+</menu>

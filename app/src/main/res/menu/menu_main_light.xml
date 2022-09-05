@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/select"
+        android:icon="@drawable/ic_check_black"
+        android:title="@string/select"
+        android:orderInCategory="0"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/choose_dir"
+        android:icon="@drawable/ic_directory_black"
+        android:title="@string/choose_directory"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_setting_black"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"/>
+</menu>
