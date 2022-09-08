@@ -7,26 +7,12 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/dir_select"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:text="@string/choose_directory"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/song_list"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:visibility="gone"
-        android:layout_weight="1"/>
-
-    <Button
-        android:id="@+id/other_directory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="@string/select_another_directory"/>
+        android:layout_weight="1"
+        android:visibility="visible"/>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/music_player_container"

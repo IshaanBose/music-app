@@ -13,4 +13,6 @@
     <color name="blue_variant">#006EE4</color>
     <color name="item_select">#606C6C6C</color>
     <color name="transparent">#00000000</color>
+    <color name="album_icon_bg">#9E67EEFF</color>
+    <color name="album_text_bg">#BCFFFFFF</color>
 </resources>

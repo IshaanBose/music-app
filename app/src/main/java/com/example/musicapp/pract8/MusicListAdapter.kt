@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.pract8
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -143,19 +142,27 @@ class MusicListAdapter(
             if (isSelection) {
                 if (position in selectedItems) {
                     selectedItems.remove(position)
-                    container.setBackgroundColor(ContextCompat.getColor(container.context, R.color.transparent))
+                    container.setBackgroundColor(ContextCompat.getColor(container.context,
+                        R.color.transparent
+                    ))
                 } else {
                     selectedItems.add(position)
-                    container.setBackgroundColor(ContextCompat.getColor(container.context, R.color.item_select))
+                    container.setBackgroundColor(ContextCompat.getColor(container.context,
+                        R.color.item_select
+                    ))
                 }
             }
         }
 
         fun update(position: Int) {
             if (position in selectedItems) {
-                container.setBackgroundColor(ContextCompat.getColor(container.context, R.color.item_select))
+                container.setBackgroundColor(ContextCompat.getColor(container.context,
+                    R.color.item_select
+                ))
             } else {
-                container.setBackgroundColor(ContextCompat.getColor(container.context, R.color.transparent))
+                container.setBackgroundColor(ContextCompat.getColor(container.context,
+                    R.color.transparent
+                ))
             }
 
             itemView.setOnClickListener(View.OnClickListener {
