@@ -6,6 +6,7 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.*
 import android.widget.Toast
@@ -20,11 +21,13 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var files: MutableList<File>
-    lateinit var adapter: MusicListAdapter
     lateinit var mediaPlayer: CustomMediaPlayer
     lateinit var musicPlayerContainer: LinearLayoutCompat
     lateinit var albumWiseMap: TreeMap<String, MutableList<File>>
     var currentAlbum: String? = null
+    var currentSongPosition: Int = 0
+    var adapter: MusicListAdapter? = null
+    var currentSongViewHolder: MusicListAdapter.ViewHolder? = null
 
     private val POPUP_MENU_FIRST = 100
     private val SP_FILE = "com.example.musicapp.dirs"
@@ -53,6 +56,12 @@ class MainActivity : AppCompatActivity() {
             findMusicFiles(file)
             albumWiseMap = getAlbumWiseSongs()
             supportFragmentManager.commit {
+                setCustomAnimations(
+                    R.anim.fade_in,
+                    R.anim.fade_out,
+                    R.anim.fade_in,
+                    R.anim.fade_out
+                )
                 setReorderingAllowed(true)
                 replace(R.id.fragment_container, AlbumViewFragment.newInstance())
             }
@@ -91,6 +100,129 @@ class MainActivity : AppCompatActivity() {
         )
 
         mediaPlayer.musicTitleTextView.isSelected = true
+        mediaPlayer.musicControlButton.setOnClickListener(View.OnClickListener {
+            musicControl(
+                currentSongPosition,
+                currentSongViewHolder,
+                albumWiseMap.get(currentAlbum)!!,
+                adapter,
+                currentAlbum!!
+            )
+        })
+    }
+
+    fun musicControl(
+        position: Int,
+        holder: MusicListAdapter.ViewHolder?,
+        dataSet: List<File>,
+        adapter: MusicListAdapter?,
+        album: String
+    ) {
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(dataSet[position].path)
+        val songName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "NULL"
+        val artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "NULL"
+        
+        if (adapter !== null) {
+            var startAnimation = true
+
+            currentSongPosition = position
+
+            if (currentSongViewHolder === null) {
+                currentSongViewHolder = holder
+            }
+
+            if (mediaPlayer.mediaPlayer.isPlaying) {
+                // starting a new song when another song is already playing
+                if (mediaPlayer.dataSource != dataSet[position].path.toString()) {
+                    adapter.colourAnimator.cancel()
+                    adapter.resetCurrentDividerColour(baseContext)
+
+                    mediaPlayer.mediaPlayer.stop()
+                    currentSongViewHolder!!.playButton.setImageResource(android.R.drawable.ic_media_play)
+
+                    currentSongViewHolder = holder
+                    holder!!.playButton.setImageResource(android.R.drawable.ic_media_pause)
+
+                    updateBottomMusicPlayer(holder.artistName.text.toString(), holder.songName.text.toString(), true)
+                    resetAndStartMediaPlayer(album, position)
+                } else { // trying to play song that is already playing -> pauses that song
+                    startAnimation = false
+
+                    mediaPlayer.mediaPlayer.pause()
+                    adapter.colourAnimator.pause()
+
+                    if (holder !== null)
+                        holder.playButton.setImageResource(android.R.drawable.ic_media_play)
+
+                    updateBottomMusicPlayer(artistName, songName, false)
+                }
+            } else {
+                // playing a song that was paused
+                if (mediaPlayer.dataSource == dataSet[position].path.toString()) {
+                    if (holder !== null)
+                        holder.playButton.setImageResource(android.R.drawable.ic_media_pause)
+
+                    updateBottomMusicPlayer(artistName, songName, true)
+
+                    mediaPlayer.mediaPlayer.start()
+
+                    if (adapter.colourAnimator.isStarted)
+                        adapter.colourAnimator.resume()
+                    else
+                        adapter.colourAnimator.start()
+
+                    startAnimation = false
+                } else { // starting a new song when no other song is playing
+                    mediaPlayer.musicControlContainer.visibility = View.VISIBLE
+
+                    resetAndStartMediaPlayer(album, position)
+                    adapter.resetCurrentDividerColour(baseContext)
+
+                    holder!!.playButton.setImageResource(android.R.drawable.ic_media_play)
+
+                    currentSongViewHolder = holder
+                    holder.playButton.setImageResource(android.R.drawable.ic_media_pause)
+
+                    updateBottomMusicPlayer(holder.artistName.text.toString(), holder.songName.text.toString(), true)
+                }
+            }
+
+            if (startAnimation) {
+                adapter.colourAnimator.start()
+            }
+        } else {
+            Log.d("bottom_player", "no adapter set")
+            val isPlaying = mediaPlayer.mediaPlayer.isPlaying
+
+            if (isPlaying) {
+                mediaPlayer.mediaPlayer.pause()
+            } else {
+                mediaPlayer.mediaPlayer.start()
+            }
+
+            updateBottomMusicPlayer(artistName, songName, !isPlaying)
+        }
+    }
+
+    fun updateBottomMusicPlayer(artistName: String, songName: String, play: Boolean) {
+        mediaPlayer.musicControlButton.setImageResource(
+            if (play) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        )
+        mediaPlayer.musicTitleTextView.text = songName
+        mediaPlayer.musicArtistTextView.text = artistName
+    }
+
+    fun onCompleteWithoutMusicListListener() {
+        currentSongPosition =
+            (currentSongPosition + 1) % (albumWiseMap[currentAlbum]?.size ?: 1)
+
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(albumWiseMap[currentAlbum]?.get(currentSongPosition)?.path.toString())
+        val songName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+        val artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+        updateBottomMusicPlayer(artistName ?: "NULL", songName ?: "NULL", true)
+        resetAndStartMediaPlayer(currentAlbum!!, currentSongPosition)
     }
 
     fun requestPermission() {
@@ -127,10 +259,26 @@ class MainActivity : AppCompatActivity() {
 
     fun switchToMusicList(albumName: String) {
         supportFragmentManager.commit {
+            setCustomAnimations(
+                R.anim.slide_in,
+                R.anim.slide_out,
+                R.anim.slide_in,
+                R.anim.slide_out
+            )
             setReorderingAllowed(true)
             replace(R.id.fragment_container, MusicListFragment.newInstance(albumName))
             addToBackStack("XYZ")
         }
+    }
+
+    fun resetAndStartMediaPlayer(album: String, position: Int) {
+        val datasource = albumWiseMap[album]!![position].path.toString()
+        mediaPlayer.mediaPlayer.reset()
+        mediaPlayer.mediaPlayer.setDataSource(datasource)
+        mediaPlayer.dataSource = datasource
+        mediaPlayer.mediaPlayer.prepare()
+
+        mediaPlayer.mediaPlayer.start()
     }
 
 //    private fun createMusicList(pathWithoutExt: String) {
@@ -306,7 +454,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.select -> {
-                startActionMode(adapter.actionModeCallback)
+//                startActionMode(adapter.actionModeCallback)
                 true
             }
 
@@ -334,7 +482,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val position = adapter.position
+//        val position = adapter.position
 //        val viewHolder = musicList.findViewHolderForAdapterPosition(position)
 
 //        when (item.itemId) {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Music App - Pract 8</string>
+    <string name="app_name">Music App</string>
     <string name="choose_directory">Choose Directory</string>
     <string name="by">By</string>
     <string name="select_another_directory">Select Another Directory</string>

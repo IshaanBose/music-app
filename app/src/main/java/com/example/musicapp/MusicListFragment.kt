@@ -30,20 +30,57 @@ class MusicListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val activity = (requireActivity() as MainActivity)
         val musicListRecyclerView: RecyclerView = view.findViewById(R.id.music_list_rc)
-        val adapter = (requireActivity() as MainActivity).albumWiseMap[albumName]?.let {
+        val adapter = activity.albumWiseMap[albumName]?.let {
             MusicListAdapter(
                 it,
-                (requireActivity() as MainActivity).mediaPlayer,
-                (requireActivity() as MainActivity).menuInflater,
-                0,
-                musicListRecyclerView
+                activity.mediaPlayer,
+                activity,
+                albumName!!,
+                0
             )
         }
+
+        activity.currentAlbum = albumName
+        activity.adapter = adapter
+
         musicListRecyclerView.adapter = adapter
         musicListRecyclerView.layoutManager = LinearLayoutManager(view.context)
         val decoration: RecyclerView.ItemDecoration = DividerItemDecoration(view.context, DividerItemDecoration.HORIZONTAL)
         musicListRecyclerView.addItemDecoration(decoration)
+
+        activity.mediaPlayer.mediaPlayer.setOnCompletionListener {
+            activity.currentSongPosition =
+                (activity.currentSongPosition + 1) % (activity.albumWiseMap[activity.currentAlbum]?.size ?: 1)
+            adapter!!.colourAnimator.cancel()
+            adapter.resetCurrentDividerColour(activity.baseContext)
+            activity.currentSongViewHolder!!.playButton.setImageResource(android.R.drawable.ic_media_play)
+
+            if (musicListRecyclerView.findViewHolderForAdapterPosition(activity.currentSongPosition) != null) {
+                activity.currentSongViewHolder = musicListRecyclerView.findViewHolderForAdapterPosition(activity.currentSongPosition) as MusicListAdapter.ViewHolder
+                activity.currentSongViewHolder!!.playButton.setImageResource(android.R.drawable.ic_media_pause)
+                activity.updateBottomMusicPlayer(
+                    activity.currentSongViewHolder!!.artistName.text.toString(),
+                    activity.currentSongViewHolder!!.songName.text.toString(),
+                    true
+                )
+                activity.resetAndStartMediaPlayer(albumName!!, activity.currentSongPosition)
+                adapter.colourAnimator.start()
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val activity = (requireActivity() as MainActivity)
+
+        activity.adapter?.colourAnimator?.cancel()
+        activity.adapter = null
+        activity.mediaPlayer.mediaPlayer.setOnCompletionListener {
+            activity.onCompleteWithoutMusicListListener()
+        }
     }
 
     companion object {
