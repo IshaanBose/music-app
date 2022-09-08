@@ -1,11 +1,9 @@
-package com.example.musicapp.pract8
+package com.example.musicapp
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
+
 import com.google.android.material.button.MaterialButton
 
 class ButtonFragment : Fragment() {

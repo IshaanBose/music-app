@@ -1,9 +1,8 @@
-package com.example.musicapp.pract8
+package com.example.musicapp
 
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
-import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,7 @@ class MusicListAdapter2(
     private val colourFrom = ContextCompat.getColor(activity.baseContext, R.color.red)
     private val colourTo = ContextCompat.getColor(activity.baseContext, R.color.blue)
     private val colourAnimator = ValueAnimator.ofArgb(colourFrom, colourTo)
-    var currentViewHolder: MusicListAdapter2.ViewHolder? = null
+    var currentViewHolder: ViewHolder? = null
     var currentPosition = 0
     var isStopped = false
 

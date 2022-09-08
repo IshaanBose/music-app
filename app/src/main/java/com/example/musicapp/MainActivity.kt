@@ -1,4 +1,4 @@
-package com.example.musicapp.pract8
+package com.example.musicapp
 
 import android.content.pm.PackageManager
 import android.content.res.Configuration

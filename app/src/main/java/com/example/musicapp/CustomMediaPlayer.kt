@@ -1,4 +1,4 @@
-package com.example.musicapp.pract8
+package com.example.musicapp
 
 import android.media.MediaPlayer
 import android.view.View
