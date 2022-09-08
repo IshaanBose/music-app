@@ -18,6 +18,12 @@ class AlbumListAdapter(
         init {
             albumName = view.findViewById(R.id.album_name)
             album = view.findViewById(R.id.album)
+
+            album.setOnClickListener(View.OnClickListener {
+                val position = adapterPosition
+                activity.switchToMusicList(dataSet[position])
+                activity.currentAlbum = dataSet[position]
+            })
         }
     }
 
@@ -30,9 +36,9 @@ class AlbumListAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.albumName.text = dataSet[position]
-        holder.album.setOnClickListener(View.OnClickListener {
-            activity.switchToMusicList(dataSet[position])
-        })
+//        holder.album.setOnClickListener(View.OnClickListener {
+//            activity.switchToMusicList(dataSet[position])
+//        })
     }
 
     override fun getItemCount(): Int {

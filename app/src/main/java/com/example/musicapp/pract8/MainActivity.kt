@@ -16,13 +16,15 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var files: MutableList<File>
     lateinit var adapter: MusicListAdapter
     lateinit var mediaPlayer: CustomMediaPlayer
     lateinit var musicPlayerContainer: LinearLayoutCompat
-    lateinit var albumWiseMap: MutableMap<String, MutableList<File>>
+    lateinit var albumWiseMap: TreeMap<String, MutableList<File>>
+    var currentAlbum: String? = null
 
     private val POPUP_MENU_FIRST = 100
     private val SP_FILE = "com.example.musicapp.dirs"
@@ -215,14 +217,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getAlbumWiseSongs(): MutableMap<String, MutableList<File>> {
-        val map = mutableMapOf<String, MutableList<File>>()
+    private fun getAlbumWiseSongs(): TreeMap<String, MutableList<File>> {
+        val map = TreeMap<String, MutableList<File>>(String.CASE_INSENSITIVE_ORDER)
         val mmr = MediaMetadataRetriever()
 
         for (i in files) {
             mmr.setDataSource(i.path)
             var key = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-            key = if (key !== null) key else "Unknown Album"
+            key = if (key !== null) key.trim() else "Unknown Album"
 
             if (map.containsKey(key)) {
                 map[key]!!.add(i)

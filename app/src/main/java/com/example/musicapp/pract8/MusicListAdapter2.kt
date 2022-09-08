@@ -17,18 +17,15 @@ import java.io.File
 class MusicListAdapter2(
     private val dataSet: List<File>,
     private val cmp: CustomMediaPlayer,
-    private val context: Context,
+    private val activity: MainActivity,
     var position: Int
 ): RecyclerView.Adapter<MusicListAdapter2.ViewHolder>() {
-    private val colourFrom = ContextCompat.getColor(context, R.color.red)
-    private val colourTo = ContextCompat.getColor(context, R.color.blue)
+    private val colourFrom = ContextCompat.getColor(activity.baseContext, R.color.red)
+    private val colourTo = ContextCompat.getColor(activity.baseContext, R.color.blue)
     private val colourAnimator = ValueAnimator.ofArgb(colourFrom, colourTo)
-    var currentViewHolder: MusicListAdapter.ViewHolder? = null
+    var currentViewHolder: MusicListAdapter2.ViewHolder? = null
     var currentPosition = 0
     var isStopped = false
-
-    init {
-    }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val songName: TextView; val artistName: TextView;
@@ -48,8 +45,18 @@ class MusicListAdapter2(
 
             playButton.setOnClickListener(View.OnClickListener {
                 val position = adapterPosition
+                val startAnimation = true
 
+                currentPosition = position
 
+                if (currentViewHolder === null) {
+                    currentViewHolder = this
+                }
+
+                if (cmp.mediaPlayer.isPlaying) {
+                    // starting a new song when another song is already playing
+                    colourAnimator.cancel()
+                }
             })
         }
     }
