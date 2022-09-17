@@ -15,4 +15,5 @@
     <color name="transparent">#00000000</color>
     <color name="album_icon_bg">#9E67EEFF</color>
     <color name="album_text_bg">#BCFFFFFF</color>
+    <color name="purple">#6A00E4</color>
 </resources>

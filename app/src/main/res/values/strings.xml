@@ -7,7 +7,19 @@
     <string name="settings">Settings</string>
     <string name="select">Select</string>
     <string name="delete">Delete</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="in_development">In Development...</string>
+    <string name="in_development">In Development…</string>
+    <string name="create_an_account"><u>Create an account?</u></string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="general">General</string>
+    <string name="default_seek_interval">Default Seek Interval</string>
+    <string name="max_recent_directories">Max Recent Directories</string>
+    <string name="current_interval">Current Interval: %1$s</string>
+    <string name="current_max_rec_dirs">Current: %1$s</string>
+    <string name="account">Account</string>
+    <string name="reset_settings_to_default">Reset Settings To Default</string>
+    <string name="delete_account_msg">This will permanently delete this account! This action is irreversible!</string>
+    <string name="delete_account">Delete Account</string>
 </resources>

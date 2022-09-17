@@ -22,36 +22,9 @@ class ButtonFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        val menuHost: MenuHost = requireActivity()
-
         view.findViewById<MaterialButton>(R.id.choose_dir).setOnClickListener(View.OnClickListener {
             (requireActivity() as MainActivity).requestPermission()
         })
-
-//        menuHost.addMenuProvider(object: MenuProvider {
-//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-//                var openDirIcon = 0
-//                var closedDirIcon = 0
-//
-//                when (view.context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK){
-//                    Configuration.UI_MODE_NIGHT_YES -> {
-//                        menuInflater.inflate(R.menu.menu_main_dark, menu)
-//                        openDirIcon = R.drawable.ic_directory_open_white
-//                        closedDirIcon = R.drawable.ic_directory_white
-//                    }
-//                    Configuration.UI_MODE_NIGHT_NO -> {
-//                        menuInflater.inflate(R.menu.menu_main_light, menu)
-//                        openDirIcon = R.drawable.ic_directory_open_black
-//                        closedDirIcon = R.drawable.ic_directory_black
-//                    }
-//                }
-//
-//                menu.getItem(0).setVisible(false)
-//            }
-//
-//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {return true}
-//
-//        })
     }
 
     companion object {

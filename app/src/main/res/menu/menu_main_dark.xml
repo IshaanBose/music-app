@@ -8,13 +8,13 @@
         android:orderInCategory="0"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/choose_dir"
+        android:id="@+id/menu_choose_dir"
         android:icon="@drawable/ic_directory_white"
         android:title="@string/choose_directory"
         android:orderInCategory="1"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/settings"
+        android:id="@+id/menu_settings"
         android:icon="@drawable/ic_setting_white"
         android:title="@string/settings"
         android:orderInCategory="2"

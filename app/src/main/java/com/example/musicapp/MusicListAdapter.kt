@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.media.MediaMetadataRetriever
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -33,12 +31,13 @@ class MusicListAdapter(
         colourAnimator.repeatMode = ValueAnimator.REVERSE
         colourAnimator.addUpdateListener( ValueAnimator.AnimatorUpdateListener {
             if (activity.currentSongViewHolder !== null) {
+                Log.d("animator", activity.currentSongViewHolder!!.songName.text.toString())
                 activity.currentSongViewHolder!!.divider.setColorFilter(it.animatedValue as Int)
             }
-        } )
+        })
     }
 
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnCreateContextMenuListener {
         val songName: TextView; val artistName: TextView;
         val playButton: ImageView;
         val seekForwardButton: ImageView; val seekBackwardButton: ImageView;
@@ -54,8 +53,13 @@ class MusicListAdapter(
             seekBackwardButton = view.findViewById(R.id.seek_backward)
             container = view.findViewById(R.id.view_holder_container)
 
+            val spSettings = activity.getSharedPreferences("${activity.spFile}.settings", Context.MODE_PRIVATE)
+
+            Log.d("view_holder", "Init: $adapterPosition")
+
             playButton.setOnClickListener(View.OnClickListener {
                 val position = adapterPosition
+                Log.d("view_holder", "In onclick: $position")
 
                 activity.musicControl(
                     position,
@@ -65,6 +69,53 @@ class MusicListAdapter(
                     album
                 )
             })
+
+            seekForwardButton.setOnClickListener(View.OnClickListener {
+                val position = adapterPosition
+                seek(true, spSettings.getInt(SettingsFragment.SP_DEF_SEEK_KEY, 5), position)
+            })
+
+            seekBackwardButton.setOnClickListener(View.OnClickListener {
+                val position = adapterPosition
+                seek(false, spSettings.getInt(SettingsFragment.SP_DEF_SEEK_KEY, 5), position)
+            })
+
+            view.setOnCreateContextMenuListener(this)
+        }
+
+        override fun onCreateContextMenu(
+            menu: ContextMenu?,
+            view: View?,
+            menuInfo: ContextMenu.ContextMenuInfo?
+        ) {
+            val inflater: MenuInflater = activity.menuInflater
+            inflater.inflate(R.menu.menu_floating_context, menu)
+        }
+    }
+
+    fun stopMusic() {
+        activity.isStopped = true
+        cmp.mediaPlayer.stop()
+        activity.currentSongViewHolder!!.playButton.setImageResource(android.R.drawable.ic_media_play)
+        cmp.musicControlButton.setImageResource(android.R.drawable.ic_media_play)
+        colourAnimator.cancel()
+        resetCurrentDividerColour(activity.currentSongViewHolder!!.divider.context)
+    }
+
+    fun seek(forward: Boolean, interval: Int, position: Int) {
+        if (cmp.mediaPlayer.isPlaying) {
+            if (cmp.dataSource == dataSet[position].path.toString()) {
+                val newTime = cmp.mediaPlayer.currentPosition +
+                        if (forward) (interval * 1000) else -(interval * 1000)
+
+                if (newTime < 0) {
+                    cmp.mediaPlayer.seekTo(0)
+                } else if (newTime > cmp.mediaPlayer.duration) {
+                    cmp.mediaPlayer.seekTo(cmp.mediaPlayer.duration)
+                } else {
+                    cmp.mediaPlayer.seekTo(newTime)
+                }
+            }
         }
     }
 
@@ -91,8 +142,14 @@ class MusicListAdapter(
 
         holder.songName.text = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE).toString()
         holder.artistName.text = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST).toString()
+        holder.itemView.setOnLongClickListener(View.OnLongClickListener {
+            Log.d("context_menu", "in onLongClick")
+            this.position = holder.adapterPosition
+            false
+        })
 
         if (cmp.dataSource == dataSet[position].path.toString()) {
+            Log.d("on_bind", "Setting current view holder as ${holder.songName.text}")
             activity.currentSongViewHolder = holder
 
             if (cmp.mediaPlayer.isPlaying) {

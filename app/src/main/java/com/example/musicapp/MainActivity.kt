@@ -1,5 +1,6 @@
 package com.example.musicapp
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.MediaMetadataRetriever
@@ -9,6 +10,7 @@ import android.os.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.*
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,14 +26,16 @@ class MainActivity : AppCompatActivity() {
     lateinit var mediaPlayer: CustomMediaPlayer
     lateinit var musicPlayerContainer: LinearLayoutCompat
     lateinit var albumWiseMap: TreeMap<String, MutableList<File>>
+    lateinit var spFile: String
+    lateinit var username: String
     var currentAlbum: String? = null
     var currentSongPosition: Int = 0
     var adapter: MusicListAdapter? = null
     var currentSongViewHolder: MusicListAdapter.ViewHolder? = null
+    var isStopped = false
 
+    val DIR_SEPARATOR = "<>"
     private val POPUP_MENU_FIRST = 100
-    private val SP_FILE = "com.example.musicapp.dirs"
-    private val DIR_SEPARATOR = "<>"
     private val EXTENSIONS = listOf(
         ".mp3", ".m4a", ".m4p", ".ogg", ".wav"
     )
@@ -48,23 +52,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             val selectedFile = uri.path?.let { File(it) }
             val pathWithoutExt = selectedFile!!.path.split("primary:")[1]
-            val path = "${Environment.getExternalStorageDirectory()}/$pathWithoutExt"
-            val parsedUri = Uri.parse(path)
-            val file = File(parsedUri.path.toString())
-            files = mutableListOf()
-
-            findMusicFiles(file)
-            albumWiseMap = getAlbumWiseSongs()
-            supportFragmentManager.commit {
-                setCustomAnimations(
-                    R.anim.fade_in,
-                    R.anim.fade_out,
-                    R.anim.fade_in,
-                    R.anim.fade_out
-                )
-                setReorderingAllowed(true)
-                replace(R.id.fragment_container, AlbumViewFragment.newInstance())
-            }
+            showAlbumListFromPath(pathWithoutExt)
         }
     }
 
@@ -83,10 +71,19 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
+                setCustomAnimations(
+                    R.anim.slide_in,
+                    R.anim.fade_out,
+                    R.anim.slide_in,
+                    R.anim.fade_out
+                )
                 setReorderingAllowed(true)
                 add(R.id.fragment_container, ButtonFragment.newInstance())
             }
         }
+
+        username = intent.extras!!.getString("username").toString()
+        spFile = "com.musicapp.$username"
 
         musicPlayerContainer = findViewById(R.id.music_player_container)
 
@@ -165,6 +162,9 @@ class MainActivity : AppCompatActivity() {
 
                     updateBottomMusicPlayer(artistName, songName, true)
 
+                    if (isStopped)
+                        mediaPlayer.mediaPlayer.prepare()
+
                     mediaPlayer.mediaPlayer.start()
 
                     if (adapter.colourAnimator.isStarted)
@@ -182,6 +182,7 @@ class MainActivity : AppCompatActivity() {
                     holder!!.playButton.setImageResource(android.R.drawable.ic_media_play)
 
                     currentSongViewHolder = holder
+//                    Log.d("view_holder", "Setting view holder in starting new song when no other song is playing: ${holder!!.songName.text}")
                     holder.playButton.setImageResource(android.R.drawable.ic_media_pause)
 
                     updateBottomMusicPlayer(holder.artistName.text.toString(), holder.songName.text.toString(), true)
@@ -203,6 +204,8 @@ class MainActivity : AppCompatActivity() {
 
             updateBottomMusicPlayer(artistName, songName, !isPlaying)
         }
+
+        isStopped = false
     }
 
     fun updateBottomMusicPlayer(artistName: String, songName: String, play: Boolean) {
@@ -211,6 +214,16 @@ class MainActivity : AppCompatActivity() {
         )
         mediaPlayer.musicTitleTextView.text = songName
         mediaPlayer.musicArtistTextView.text = artistName
+    }
+
+    fun resetAndStartMediaPlayer(album: String, position: Int) {
+        val datasource = albumWiseMap[album]!![position].path.toString()
+        mediaPlayer.mediaPlayer.reset()
+        mediaPlayer.mediaPlayer.setDataSource(datasource)
+        mediaPlayer.dataSource = datasource
+        mediaPlayer.mediaPlayer.prepare()
+
+        mediaPlayer.mediaPlayer.start()
     }
 
     fun onCompleteWithoutMusicListListener() {
@@ -261,89 +274,15 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.commit {
             setCustomAnimations(
                 R.anim.slide_in,
-                R.anim.slide_out,
+                R.anim.fade_out,
                 R.anim.slide_in,
-                R.anim.slide_out
+                R.anim.fade_out
             )
             setReorderingAllowed(true)
             replace(R.id.fragment_container, MusicListFragment.newInstance(albumName))
             addToBackStack("XYZ")
         }
     }
-
-    fun resetAndStartMediaPlayer(album: String, position: Int) {
-        val datasource = albumWiseMap[album]!![position].path.toString()
-        mediaPlayer.mediaPlayer.reset()
-        mediaPlayer.mediaPlayer.setDataSource(datasource)
-        mediaPlayer.dataSource = datasource
-        mediaPlayer.mediaPlayer.prepare()
-
-        mediaPlayer.mediaPlayer.start()
-    }
-
-//    private fun createMusicList(pathWithoutExt: String) {
-//        val path = "${Environment.getExternalStorageDirectory()}/$pathWithoutExt"
-//        Log.d("custtest", path)
-//
-//        val parsedUri = Uri.parse(path)
-//        val file = File(parsedUri.path.toString())
-//
-////        files = cleanFilesList(file.listFiles()!!)
-//
-//        if (files.isEmpty()) {
-//            MaterialAlertDialogBuilder(this@MainActivity)
-//                .setTitle("Error!")
-//                .setMessage("The chosen directory is either empty, or does not contain any mp3/mp4 files!")
-//                .setNeutralButton("OK") { dialog, _ ->
-//                    dialog.dismiss()
-//                }
-//                .setCancelable(false)
-//                .show()
-//        } else {
-//            val sp = getSharedPreferences(SP_FILE, MODE_PRIVATE)
-//            val dirs = sp.getString("dirs", null)
-//            val dirList: MutableList<String>
-//            Log.d("custtest", "dirs: ${dirs.toString()}")
-//
-//            if (dirs !== null) {
-//                dirList = dirs.split(DIR_SEPARATOR).toMutableList()
-//
-//                if (dirList.size == 5) {
-//                    dirList.removeLast()
-//                }
-//
-//                Log.d("custtest", dirList.toString())
-//
-//                if (pathWithoutExt in dirList) {
-//                    dirList.removeAt(dirList.indexOf(pathWithoutExt))
-//                }
-//
-//                dirList.add(0, pathWithoutExt)
-//            } else {
-//                dirList = mutableListOf(pathWithoutExt)
-//            }
-//
-//            val spEditor = getSharedPreferences(SP_FILE, MODE_PRIVATE).edit()
-//            spEditor.putString("dirs", dirList.joinToString(DIR_SEPARATOR))
-//            spEditor.apply()
-//
-//            if (mediaPlayer.mediaPlayer.isPlaying) {
-//                mediaPlayer.mediaPlayer.stop()
-//                mediaPlayer.mediaPlayer.reset()
-//            }
-//
-////            adapter = MusicListAdapter(files.toMutableList(), mediaPlayer, menuInflater, 0, musicList)
-////
-////            musicList.adapter = adapter
-////            musicList.layoutManager = LinearLayoutManager(applicationContext)
-////            val decoration: RecyclerView.ItemDecoration = DividerItemDecoration(baseContext, DividerItemDecoration.HORIZONTAL)
-////            musicList.addItemDecoration(decoration)
-////
-////            chooseDirButton.visibility = View.GONE
-////            musicList.visibility = View.VISIBLE
-////            musicPlayerContainer.visibility = View.GONE
-//        }
-//    }
 
     private fun findMusicFiles(dir: File) {
         if (dir.isDirectory) {
@@ -385,80 +324,114 @@ class MainActivity : AppCompatActivity() {
         return map
     }
 
+    private fun showAlbumListFromPath(path: String) {
+        val sp = getSharedPreferences("$spFile.dirs", MODE_PRIVATE)
+        val dirs = sp.getString("dirs", null)
+        val dirList: MutableList<String>
+
+        if (dirs !== null) {
+            dirList = dirs.split(DIR_SEPARATOR).toMutableList()
+
+            if (dirList.size == getSharedPreferences("$spFile.settings", MODE_PRIVATE).getInt(SettingsFragment.SP_DEF_SEEK_KEY, 5)) {
+                dirList.removeLast()
+            }
+
+            if (path in dirList) {
+                dirList.removeAt(dirList.indexOf(path))
+            }
+
+            dirList.add(0, path)
+        } else {
+            dirList = mutableListOf(path)
+        }
+
+        val spEditor = sp.edit()
+        spEditor.putString("dirs", dirList.joinToString(DIR_SEPARATOR))
+        spEditor.apply()
+
+        val filePath = "${Environment.getExternalStorageDirectory()}/$path"
+        val parsedUri = Uri.parse(filePath)
+        val file = File(parsedUri.path.toString())
+        files = mutableListOf()
+
+        findMusicFiles(file)
+        albumWiseMap = getAlbumWiseSongs()
+        supportFragmentManager.commit {
+            setCustomAnimations(
+                R.anim.slide_in,
+                R.anim.fade_out,
+                R.anim.slide_in,
+                R.anim.fade_out
+            )
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, AlbumViewFragment.newInstance())
+        }
+    }
+
+    fun logout() {
+        startActivity(Intent(baseContext, StartingActivity::class.java))
+        finish()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
-        var openDirIcon = 0
-        var closedDirIcon = 0
-
-        when (baseContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK){
-            Configuration.UI_MODE_NIGHT_YES -> {
-                inflater.inflate(R.menu.menu_main_dark, menu)
-                openDirIcon = R.drawable.ic_directory_open_white
-                closedDirIcon = R.drawable.ic_directory_white
-            }
-            Configuration.UI_MODE_NIGHT_NO -> {
-                inflater.inflate(R.menu.menu_main_light, menu)
-                openDirIcon = R.drawable.ic_directory_open_black
-                closedDirIcon = R.drawable.ic_directory_black
-            }
-        }
+        val openDirIcon = R.drawable.ic_directory_open_white
+        val closedDirIcon = R.drawable.ic_directory_white
+        inflater.inflate(R.menu.menu_main_dark, menu)
 
         menu.getItem(0).setVisible(false)
 
-//        Handler(Looper.myLooper()!!).post(Runnable {
-//            val view = findViewById<View>(R.id.choose_dir)
-//
-//            if (view !== null) {
-//                view.setOnLongClickListener(View.OnLongClickListener {
-//                    menu.getItem(1).setIcon(openDirIcon)
-//
-//                    val popupMenu = PopupMenu(baseContext, it)
-//                    val sp = getSharedPreferences(SP_FILE, MODE_PRIVATE)
-//                    val dirs = sp.getString("dirs", null)
-//
-//                    if (dirs !== null) {
-//                        val dirList = dirs.split(DIR_SEPARATOR)
-//
-//                        for (i in dirList.indices) {
-//                            popupMenu.menu.add(0, POPUP_MENU_FIRST + i, i, dirList[i])
-//                                .setIcon(R.drawable.ic_directory_open_black)
-//                                .setOnMenuItemClickListener {
-//                                    createMusicList(dirList[i])
-//                                    true
-//                                }
-//                                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-//
-//                            popupMenu.setOnDismissListener {
-//                                menu.getItem(1).setIcon(closedDirIcon)
-//                            }
-//                        }
-//
-//                        popupMenu.show()
-//                    } else {
-//                        Toast.makeText(baseContext, "No recent directories!", Toast.LENGTH_LONG).show()
-//                    }
-//
-//                    true
-//                })
-//            }
-//        })
+        Handler(Looper.myLooper()!!).post(Runnable {
+            Log.d("menu_click", "hallo")
+            val view = findViewById<View>(R.id.menu_choose_dir)
+
+            if (view !== null) {
+                view.setOnLongClickListener(View.OnLongClickListener {
+                    val popupMenu = PopupMenu(baseContext, it)
+                    val sp = getSharedPreferences("$spFile.dirs", MODE_PRIVATE)
+                    val dirs = sp.getString("dirs", null)
+
+                    if (dirs !== null) {
+                        menu.getItem(1).setIcon(openDirIcon)
+                        val dirList = dirs.split(DIR_SEPARATOR)
+
+                        for (i in dirList.indices) {
+                            popupMenu.menu.add(0, POPUP_MENU_FIRST + i, i, dirList[i])
+                                .setIcon(R.drawable.ic_directory_open_black)
+                                .setOnMenuItemClickListener {
+                                    showAlbumListFromPath(dirList[i])
+                                    true
+                                }
+                                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+
+                            popupMenu.setOnDismissListener {
+                                menu.getItem(1).setIcon(closedDirIcon)
+                            }
+                        }
+
+                        popupMenu.show()
+                    } else {
+                        Toast.makeText(baseContext, "No recent directories!", Toast.LENGTH_LONG).show()
+                    }
+
+                    true
+                })
+            } else {
+                Log.d("menu_click", "Menu item null?????")
+            }
+        })
 
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.choose_dir -> {
+            R.id.menu_choose_dir -> {
                 requestPermission()
                 true
             }
 
-            R.id.select -> {
-//                startActionMode(adapter.actionModeCallback)
-                true
-            }
-
-            R.id.settings -> {
+            R.id.menu_settings -> {
                 supportFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace(R.id.fragment_container, SettingsFragment.newInstance())
@@ -479,22 +452,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         mediaPlayer.mediaPlayer.release()
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-//        val position = adapter.position
-//        val viewHolder = musicList.findViewHolderForAdapterPosition(position)
-
-//        when (item.itemId) {
-//            R.id.music_control -> adapter.musicControl(position, viewHolder as MusicListAdapter.ViewHolder)
-//            R.id.music_stop -> adapter.stopMusic()
-//            R.id.seek_forward_5 -> adapter.seek(true, 5, position)
-//            R.id.seek_forward_10 -> adapter.seek(true, 10, position)
-//            R.id.seek_backward_5 -> adapter.seek(false, 5, position)
-//            R.id.seek_backward_10 -> adapter.seek(false, 10, position)
-//        }
-
-        return super.onContextItemSelected(item)
     }
 
     override fun onBackPressed() {

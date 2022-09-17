@@ -4,11 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/drawable/divider.xml" value="0.2265" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2265" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/drawable/splash_inset.xml" value="0.12" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/activity_profile.xml" value="0.264" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/activity_sign_up.xml" value="0.22826086956521738" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/activity_starting.xml" value="0.22826086956521738" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/fragment_album_view.xml" value="0.22826086956521738" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/fragment_button.xml" value="0.25" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/fragment_music_list.xml" value="0.22826086956521738" />
-        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/fragment_settings.xml" value="0.22826086956521738" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/fragment_settings.xml" value="0.4" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/item_album.xml" value="0.22826086956521738" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/layout/item_song.xml" value="0.264" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/menu/menu_action_mode.xml" value="0.25" />
@@ -16,6 +21,7 @@
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/menu/menu_main.xml" value="0.25" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/menu/menu_main_dark.xml" value="0.25" />
         <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/menu/menu_main_light.xml" value="0.25" />
+        <entry key="..\:/AndroidProjects/MusicApp/app/src/main/res/mipmap-anydpi-v26/ic_splash_white.xml" value="0.121" />
       </map>
     </option>
   </component>
